@@ -16,6 +16,8 @@ struct ContentView: View   {
     @State private var score = 0;
     @State private var showingScore = false
     @State private var scoreTitle = ""
+    @State private var roundNumber = 1;
+    @State private var gameOver = false
     var body: some View {
         ZStack{
             RadialGradient( stops:[
@@ -27,6 +29,9 @@ struct ContentView: View   {
                 Spacer()
                 Text("Guess the flag")
                     .font(.largeTitle.bold())
+                    .foregroundStyle(.white)
+                Text("Round \(roundNumber)")
+                    .font(.title3.bold())
                     .foregroundStyle(.white)
                 VStack(spacing: 15){
                     VStack {
@@ -64,7 +69,12 @@ struct ContentView: View   {
         .alert(scoreTitle, isPresented: $showingScore){
             Button("Continue", action: askQuestion)
         } message: {
-            Text("Your score is \(score)!!")
+            Text("Your score is \(score)!")
+        }
+        .alert("Game over", isPresented: $gameOver){
+            Button("Start over", action: resetGame)
+        } message:{
+            Text("Your final score is \(score)!!")
         }
     }
     func flagTapped(_ number: Int){
@@ -72,17 +82,27 @@ struct ContentView: View   {
             score+=1
             scoreTitle = "Correct +1 points🥳"
         } else {
-            scoreTitle = "Wrong -2 points💩"
-            if(score > 0){
-                score -= 2
-            }
+            scoreTitle = "Wrong. That's the flag of \(countries[number])💩"
         }
-        showingScore = true
+        
+        if(roundNumber < 8){
+            roundNumber += 1
+            showingScore = true
+        }else{
+            gameOver = true
+            showingScore = false
+        }
     }
     
     func askQuestion(){
         countries.shuffle()
         correctAnswer = Int.random(in: 0...2)
+    }
+    func resetGame(){
+        score = 0
+        gameOver = false
+        roundNumber = 1
+        askQuestion()
     }
 }
 
