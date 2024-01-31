@@ -6,7 +6,23 @@
 //
 
 import SwiftUI
+struct RedAlert: ViewModifier {
+    var noTip: Bool
+    func body(content: Content) -> some View{
+        if(noTip){
+            content
+                .foregroundStyle(.red)
+        }else{
+            content
+        }
+    }
+}
 
+extension View {
+    func isAlert(noTip: Bool) -> some View{
+        modifier(RedAlert(noTip: noTip))
+    }
+}
   struct ContentView: View {
     @State private var checkAmount = 0.0
     @State private var numberOfPeople = 2
@@ -57,6 +73,7 @@ import SwiftUI
                 }
                 Section("Total amount"){
                     Text(total, format: .currency(code: Locale.current.currency?.identifier ?? "USD"))
+                        .isAlert(noTip: tipPercentage == 0)
                 }
             }
             .navigationTitle("WeSplit")

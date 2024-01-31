@@ -7,6 +7,19 @@
 
 import SwiftUI
 
+struct Round: ViewModifier {
+    func body(content:Content) -> some View{
+        content
+            .clipShape(Capsule())
+            .shadow(radius: 5)
+    }
+}
+
+extension View{
+    func roundStyle() -> some View{
+        modifier(Round())
+    }
+}
 struct ContentView: View   {
     @State private var showingAlert = false
     @State private var countries = ["Estonia", "France",
@@ -47,8 +60,7 @@ struct ContentView: View   {
                         } label: {
                             Image(countries[number])
                             //alternative to .clipShape(.capsule)
-                                .clipShape(Capsule())
-                                .shadow(radius: 5)
+                                .roundStyle()
                         }
                     }
                 }
