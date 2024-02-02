@@ -10,16 +10,38 @@ import SwiftUI
 struct ContentView: View {
     @State private var sleepAmount = 8.0
     @State private var wakeUp = Date.now
+    @State private var coffeeAmount = 1
     var body: some View {
-        VStack{
-            DatePicker("Please enter a date", selection: $wakeUp, in: Date.now...)
-                .labelsHidden()
-            Stepper("\(sleepAmount.formatted()) hours", value:  $sleepAmount, in: 4...12, step: 0.25)
-            
-            Text(Date.now, format: .dateTime.day().month().year().second())
-            Text(Date.now, format: .dateTime.hour().minute().second())
-            Text(Date.now.formatted(date: .long, time: .complete  ))
+        NavigationStack{
+            VStack{
+                Text("When do you want to wake up?")
+                    .font(.headline)
+                DatePicker("Please enter a time", selection: $wakeUp, displayedComponents: .hourAndMinute)
+                    .labelsHidden()
+                Text("Desired amount of sleep")
+                    .font(.headline)
+                Stepper("\(sleepAmount.formatted()) hours", value: $sleepAmount, in: 4...12, step: 0.25)
+                Text("Daily coffee intake")
+                    .font(.headline)
+                Stepper("\(coffeeAmount) cup(s)", value: $sleepAmount, in: 1...20)
+            }
+            .navigationTitle("BetterRest")
+            .toolbar{
+                Button  ("Calculate", action: calculateBedtime  )
+            }
         }
+//        VStack{
+//            DatePicker("Please enter a date", selection: $wakeUp, in: Date.now...)
+//                .labelsHidden()
+//            Stepper("\(sleepAmount.formatted()) hours", value:  $sleepAmount, in: 4...12, step: 0.25)
+//
+//            Text(Date.now, format: .dateTime.day().month().year().second())
+//            Text(Date.now, format: .dateTime.hour().minute().second())
+//            Text(Date.now.formatted(date: .long, time: .complete  ))
+//        }
+    }
+    func calculateBedtime(){
+        
     }
     func exampleDates(){
         var tomorrow = Date.now.addingTimeInterval(86400)
