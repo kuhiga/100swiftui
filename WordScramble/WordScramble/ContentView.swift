@@ -11,35 +11,51 @@ struct ContentView: View {
     @State private var usedWords = [String]()
     @State private var rootWord = ""
     @State private var newWord = ""
-    
+    @State private var score = 0
     @State private var errorTitle = ""
     @State private var errorMessage = ""
     @State private var showingError = false
     var body: some View {
         NavigationStack{
-            List {
-                Section{
-                    TextField("Enter your word", text: $newWord)
-                        .autocorrectionDisabled()
-                        .textInputAutocapitalization(.never)
-                }
-                Section{
-                    ForEach(usedWords, id: \.self){ word in
-                        HStack{
-                            Image(systemName: "\(word.count).circle")
-                            Text(word)
+            VStack{
+                Grid{
+                    Text("Score: \(score)")
+                    List {
+                        Section{
+                            TextField("Enter your word", text: $newWord)
+                                .autocorrectionDisabled()
+                                .textInputAutocapitalization(.never)
+                        }
+                        Section{
+                            ForEach(usedWords, id: \.self){ word in
+                                HStack{
+                                    Image(systemName: "\(word.count).circle")
+                                    Text(word)
+                                }
+                            }
+                        }
+                    }
+                    .padding(30)
+                    .navigationTitle(rootWord)
+                    .onSubmit(addNewWord)
+                    .onAppear(perform: startGame)
+                    .alert(errorTitle, isPresented: $showingError){
+                        Button("Ok"){
+                            newWord = ""
+                        }
+                    } message: {
+                        Text(errorMessage)
+                    }
+                    .toolbar{
+                        Button("Shuffle word"){
+                            usedWords = []
+                            score = 0
+                            startGame()
                         }
                     }
                 }
-            }
-            .navigationTitle(rootWord)
-            .onSubmit(addNewWord)
-            .onAppear(perform: startGame)
-            .alert(errorTitle, isPresented: $showingError){
-                Button("Ok"){ }
-            } message: {
-                Text(errorMessage)
-            }
+                .padding(5)
+                }
         }
     }
     //func add new word: lower case wword and remove white strings
@@ -59,9 +75,14 @@ struct ContentView: View {
             wordError(title: "'\(formattedNewWord)' is not a real word", message: "Read a dictionary!")
             return
         }
+        guard isLongEnough(word: formattedNewWord) else {
+            wordError(title: "Word is too short", message: "It must be atleast 2 characters long!")
+            return
+        }
         withAnimation{
             usedWords.insert(formattedNewWord, at: 0)
         }
+        score += formattedNewWord.count
         newWord = ""
     }
     func startGame(){
@@ -76,9 +97,11 @@ struct ContentView: View {
         fatalError("Could not load \"start.txt\" from bundle.")
     }
     func isOriginal(word: String) -> Bool{
-        return !usedWords.contains(word)
+        return !usedWords.contains(word) && rootWord != word
     }
-    
+    func isLongEnough(word: String) -> Bool{
+        return word.count > 1
+    }
     func isPossibleWord(word: String) -> Bool{
         var tempWord = rootWord
         for letter in word {
