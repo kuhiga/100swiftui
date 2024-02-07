@@ -20,6 +20,38 @@ extension View{
         modifier(Round())
     }
 }
+struct Conditional3DRotation: ViewModifier {
+    var shouldRotate: Bool
+    var degrees: Double
+
+    func body(content: Content) -> some View {
+        if shouldRotate {
+            content.rotation3DEffect(.degrees(degrees), axis: (x: 0.0, y: 1.0, z: 0.0))
+        } else {
+            content
+        }
+    }
+}
+
+struct FlagImage: View {
+    var text: String
+    var rotateAmount: Double
+    var opacityAmount: Double
+    var scaleAmount: Double
+    
+    var body: some View {
+        Image(text)
+            .renderingMode(.original)
+            .roundStyle()
+             .clipShape(Capsule())
+             .overlay(Capsule().stroke(Color.black, lineWidth: 2))
+             .shadow(radius: 5)
+             .opacity(opacityAmount)
+             .scaleEffect(scaleAmount)
+             .rotation3DEffect(.degrees(Double(rotateAmount)),
+                               axis: (x: 0.0, y: 1.0, z: 0.0))
+    }
+}
 struct ContentView: View   {
     @State private var showingAlert = false
     @State private var countries = ["Estonia", "France",
@@ -31,6 +63,10 @@ struct ContentView: View   {
     @State private var scoreTitle = ""
     @State private var roundNumber = 1;
     @State private var gameOver = false
+    @State private var tappedNumber = -1
+    @State private var rotateAmount = 0.0
+    @State private var opacityAmount = 1.0
+    @State private var scaleAmount = 1.0
     var body: some View {
         ZStack{
             RadialGradient( stops:[
@@ -56,11 +92,16 @@ struct ContentView: View   {
                     }
                     ForEach(0..<3) { number in
                         Button {
+                            withAnimation(.easeOut(duration: 1)) {
+                                rotateAmount += 360
+                            }
+                            withAnimation() {
+                                opacityAmount -= 0.75
+                                scaleAmount -= 0.5
+                            }
                             flagTapped(number)
                         } label: {
-                            Image(countries[number])
-                            //alternative to .clipShape(.capsule)
-                                .roundStyle()
+                            FlagImage(text: countries[number], rotateAmount: tappedNumber == number ? rotateAmount : 0, opacityAmount: tappedNumber == number ? 1 : opacityAmount, scaleAmount:tappedNumber == number ? 1 : scaleAmount )
                         }
                     }
                 }
@@ -90,6 +131,7 @@ struct ContentView: View   {
         }
     }
     func flagTapped(_ number: Int){
+        tappedNumber = number
         if number == correctAnswer {
             score+=1
             scoreTitle = "Correct +1 points🥳"
@@ -109,12 +151,17 @@ struct ContentView: View   {
     func askQuestion(){
         countries.shuffle()
         correctAnswer = Int.random(in: 0...2)
+        opacityAmount = 1.0
+        rotateAmount = 0.0
+        scaleAmount = 1.0
+        tappedNumber = -1
     }
     func resetGame(){
         score = 0
         gameOver = false
         roundNumber = 1
         askQuestion()
+        
     }
 }
 
