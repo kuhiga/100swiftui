@@ -32,26 +32,68 @@ class Expenses {
         }
     }
 }
+@Observable
+class Settings{
+    init(){
+        if let savedPreferredCurrency = UserDefaults.standard.string(forKey: "preferredCurrency"){
+            preferredCurrency = savedPreferredCurrency
+            return
+        }
+        preferredCurrency = "USD"
+    }
+    var preferredCurrency = String(){
+        didSet{
+            UserDefaults.standard.set(preferredCurrency, forKey: "preferredCurrency")
+        }
+    }
+}
 
 struct ContentView: View {
     @State private var expenses = Expenses()
+    @State private var settings = Settings()
     @State private var showingAddExpense = false
+    @State private var showingSettings = false
     @State private var showDeleteAlert = false
+    private var businessItems: [ExpenseItem] {
+        expenses.items.filter { $0.type == "Business" }
+    }
+
+    private var personalItems: [ExpenseItem] {
+        expenses.items.filter { $0.type == "Personal" }
+    }
     var body: some View {
         NavigationStack{
             List{
-                ForEach(expenses.items){  item in
-                    HStack{
-                        VStack(alignment: .leading) {
-                            Text(item.name)
-                                .font(.headline)
-                            Text(item.type)
-                        }
-                        Text(item.amount, format: .currency(code: "USD"))
+                Section(header: Text("Personal expenses")){
+                    ForEach(personalItems){  item in
+                        HStack{
+                            VStack(alignment: .leading) {
+                                Text(item.name)
+                                    .font(.headline)
+                                Text(item.type)
+                            }
+                            Text(item.amount, format: .currency(code: settings.preferredCurrency))
+                                .foregroundColor(item.amount > 100 ? .red : .primary)
 
+                        }
                     }
+                    .onDelete(perform: removeItems)
                 }
-                .onDelete(perform: removeItems)
+                Section(header: Text("Business expenses")){
+                    ForEach(businessItems){  item in
+                        HStack{
+                            VStack(alignment: .leading) {
+                                Text(item.name)
+                                    .font(.headline)
+                                Text(item.type)
+                            }
+                            Text(item.amount, format: .currency(code: settings.preferredCurrency))
+                                .foregroundColor(item.amount > 100 ? .red : .primary)
+
+                        }
+                    }
+                    .onDelete(perform: removeItems)
+                }
             }
             .alert(isPresented: $showDeleteAlert){
                 Alert(
@@ -64,6 +106,9 @@ struct ContentView: View {
                 )
             }
             .toolbar{
+                Button("Setting", systemImage: "gear"){
+                    showingSettings = true
+                }
                 Button("Delete All", systemImage: "trash"){
                     if(!expenses.items.isEmpty){
                         showDeleteAlert = true
@@ -76,8 +121,11 @@ struct ContentView: View {
             .navigationTitle("iExpense")
         }
         .sheet(isPresented: $showingAddExpense){
-            AddView(expenses: expenses)
+            AddView(expenses: expenses, currency: settings.preferredCurrency)
         }
+        .sheet(isPresented: $showingSettings, content: {
+            SettingsView(settings: settings)
+        })
         
     }
     func removeItems(at offsets: IndexSet ){
