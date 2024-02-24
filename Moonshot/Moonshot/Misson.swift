@@ -8,8 +8,8 @@
 import Foundation
 
 //nested struct
-struct Mission: Codable, Identifiable {
-    struct CrewRole: Codable {
+struct Mission: Codable, Hashable, Identifiable {
+    struct CrewRole: Codable, Hashable {
         let name: String
         let role: String
     }

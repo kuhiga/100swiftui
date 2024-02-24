@@ -109,9 +109,9 @@ struct ContentView: View {
     
 //        NavigationStack{
 //            List(0..<100){ i in
-//                NavigationLi  nk("select \(i)", value: i)
+//                NavigationLink("select \(i)", value: i)
 //            }
-//            .navigationDestination(for: Int   .self){ selection in
+//            .navigationDestination(for: Int.self){ selection in
 //                  Text("You selected \(selection  )")
 //            }
 //        }
