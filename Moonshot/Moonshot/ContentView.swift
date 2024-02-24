@@ -16,7 +16,7 @@ struct CustomText: View{
         print("creating a custom text ")
         self.text = text
     }
-}
+}  
 
 struct Address: Codable{
     let street: String
@@ -41,9 +41,7 @@ struct ContentView: View {
                 LazyVGrid(columns: columns){
                     ForEach(missions){ mission in
                         NavigationLink {
-                            Text(mission.displayName)
-                                .font(.title)
-                            Text(mission.description)
+                            MissionView(mission: mission, astronauts: astronauts)
                         } label: {
                             VStack{
                                 Image(mission.image)
