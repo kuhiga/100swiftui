@@ -29,6 +29,9 @@ struct MissionView: View{
                         .frame(height: 2)
                         .foregroundStyle(.lightBackground)
                         .padding(.vertical  )
+                    Text(mission.formattedLaunchDate)
+                        .font(.title3)
+                        .foregroundStyle(.white.opacity(0.5))
                     Text("Mission Highlights")
                         .font(.title.bold())
                         .padding(.bottom, 5)
@@ -95,6 +98,6 @@ struct MissionView: View{
 #Preview {
     let missions: [Mission] = Bundle.main.decodeToJSON("missions.json")
     let astronauts: [String: Astronaut] = Bundle.main.decodeToJSON("astronauts.json")
-    return MissionView(mission: missions[0], astronauts: astronauts)
+    return MissionView(mission: missions[1], astronauts: astronauts)
         .preferredColorScheme(.dark)
 }
